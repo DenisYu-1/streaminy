@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: mediasoup-backend
+    network_mode: "host"
+    environment:
+      PORT: 3000
+      LISTEN_IP: 0.0.0.0
+      ENABLE_UDP: ${ENABLE_UDP:-true}
+      ANNOUNCED_IP: ${ANNOUNCED_IP}
+      WORKER_RTC_MIN_PORT: ${WORKER_RTC_MIN_PORT:-50000}
+      WORKER_RTC_MAX_PORT: ${WORKER_RTC_MAX_PORT:-50200}
+      WEBRTC_MIN_PORT: ${WEBRTC_MIN_PORT:-50000}
+      WEBRTC_MAX_PORT: ${WEBRTC_MAX_PORT:-50200}
+      ROOM_MAX_PARTICIPANTS: ${ROOM_MAX_PARTICIPANTS:-4}
+      ROOM_PASSWORD: ${ROOM_PASSWORD}
+      TURN_USERNAME: ${TURN_USERNAME:-}
+      TURN_CREDENTIAL: ${TURN_CREDENTIAL:-}
+      TURN_SERVERS: ${TURN_SERVERS:-[]}
+    cap_add:
+      - SYS_NICE
+    restart: unless-stopped
+
+  coturn:
+    image: instrumentisto/coturn:latest
+    container_name: coturn
+    network_mode: "host"
+    command: -c /etc/turnserver.conf
+    volumes:
+      - ./docker/turnserver.conf:/etc/turnserver.conf:ro
+    restart: unless-stopped

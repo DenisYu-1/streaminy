@@ -1,0 +1,29 @@
+# Copy to turnserver.conf and fill in your values
+
+realm=video.chat
+fingerprint
+listening-ip=0.0.0.0
+
+# Your server's public IP
+external-ip=YOUR_PUBLIC_IP
+
+# IP of the mediasoup container (usually internal docker/host IP)
+allowed-peer-ip=YOUR_INTERNAL_IP
+
+listening-port=3478
+min-port=49160
+max-port=49200
+
+log-file=/var/log/turnserver.log
+verbose
+
+# TURN user credentials (must match TURN_USERNAME / TURN_CREDENTIAL in .env)
+user=your-turn-user:your-turn-password
+
+no-auth
+alt-listening-port=3333
+
+# Uncomment for TLS support
+#cert=/etc/letsencrypt/live/<DOMAIN>/cert.pem
+#pkey=/etc/letsencrypt/live/<DOMAIN>/privkey.pem
+#tls-listening-port=443

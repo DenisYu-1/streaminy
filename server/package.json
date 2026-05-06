@@ -1,0 +1,15 @@
+{
+  "name": "streaminy-cricket-server",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mediasoup": "^3.14.17",
+    "prom-client": "^15.1.3",
+    "ws": "^8.18.0"
+  }
+}

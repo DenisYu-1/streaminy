@@ -1,0 +1,13 @@
+logs/
+certs/
+*.env
+*.env.*
+!*.env.dist
+docker-compose.override.yml
+*.pem
+*.key
+*.crt
+*.csr
+*.log
+turnserver.conf
+

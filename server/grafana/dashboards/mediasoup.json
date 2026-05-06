@@ -1,0 +1,187 @@
+{
+  "uid": "mediasoup-sfu",
+  "title": "Mediasoup SFU",
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 38,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Active Rooms",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "datasource": "Prometheus", "expr": "mediasoup_rooms", "instant": true }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Connected Peers",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "datasource": "Prometheus", "expr": "mediasoup_peers", "instant": true }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Producers",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "datasource": "Prometheus", "expr": "sum(mediasoup_producers)", "instant": true }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] } } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Consumers",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "datasource": "Prometheus", "expr": "mediasoup_consumers", "instant": true }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] } } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "WS Connections",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "datasource": "Prometheus", "expr": "mediasoup_ws_connections", "instant": true }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Message Rate by Type",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "rate(mediasoup_messages_total[1m])",
+        "legendFormat": "{{type}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Producers by Kind",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "mediasoup_producers",
+        "legendFormat": "{{kind}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Node.js Heap Used",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "nodejs_heap_size_used_bytes",
+        "legendFormat": "heap used"
+      }],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Node.js CPU Usage",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "rate(process_cpu_seconds_total[1m]) * 100",
+        "legendFormat": "cpu %"
+      }],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Event Loop Lag",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "nodejs_eventloop_lag_seconds",
+        "legendFormat": "lag"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Active Handles & Requests",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "targets": [
+        { "datasource": "Prometheus", "expr": "nodejs_active_handles_total", "legendFormat": "handles" },
+        { "datasource": "Prometheus", "expr": "nodejs_active_requests_total", "legendFormat": "requests" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Producer Bitrate by Kind & Media Type",
+      "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "mediasoup_producer_bitrate_bits",
+        "legendFormat": "{{room}} · {{kind}} · {{media_type}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "bps" } }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Producer Quality Score (0–10)",
+      "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "mediasoup_producer_score",
+        "legendFormat": "{{room}} · {{kind}} · {{media_type}}"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "green", "value": 8 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Packet Loss Rate",
+      "gridPos": { "x": 0, "y": 36, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "rate(mediasoup_producer_packets_lost[1m])",
+        "legendFormat": "{{room}} · {{kind}} · {{media_type}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "pps" } }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Producer Jitter",
+      "gridPos": { "x": 12, "y": 36, "w": 12, "h": 8 },
+      "targets": [{
+        "datasource": "Prometheus",
+        "expr": "mediasoup_producer_jitter_seconds",
+        "legendFormat": "{{room}} · {{kind}} · {{media_type}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    }
+  ]
+}

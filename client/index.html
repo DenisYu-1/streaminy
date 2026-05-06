@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Streaminy-Cricket</title>
+  <link rel="stylesheet" href="/styles.css" />
+
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <h1>Streaminy-Cricket</h1>
+    </header>
+
+    <main>
+      <section class="join-card" id="joinPanel">
+        <h2>Войти в комнату</h2>
+        <form id="joinForm">
+          <label>
+            <span>Пароль</span>
+            <input id="roomPassword" type="password" required placeholder="••••••••" />
+          </label>
+          <label>
+            <span>Ваше имя</span>
+            <input id="peerName" required placeholder="User" />
+          </label>
+          <button type="submit">Подключиться</button>
+          <p id="joinError" hidden></p>
+        </form>
+      </section>
+
+      <section class="conference" id="conferencePanel" hidden>
+        <div class="toolbar">
+          <button id="muteMic">Выключить микрофон</button>
+          <button id="muteVideo">Отключить видео</button>
+          <button id="startScreen" hidden>Поделиться экраном</button>
+          <button id="stopScreen" disabled hidden>Остановить экран</button>
+          <button id="leaveRoom">Выйти</button>
+          <p id="reconnectBanner" hidden></p>
+        </div>
+
+        <div class="conf-body">
+          <div class="screen-area" id="screenArea">
+            <div class="screen-grid" id="screenGrid"></div>
+          </div>
+          <div class="cameras-panel">
+            <div class="local-tile" id="localTile">
+              <div class="media-area">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <p id="localName"></p>
+              </div>
+            </div>
+            <div id="participants"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

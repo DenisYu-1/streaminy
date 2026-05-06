@@ -1,0 +1,392 @@
+:root {
+  --bg: #0b1020;
+  --card: #131d3a;
+  --accent: #18b0ff;
+  --accent2: #7f7dff;
+  --text: #f5f7ff;
+  --muted: #8d97b7;
+  --danger: #ff6363;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: 'InterVar';
+  src: local('Inter');
+  font-weight: 400 700;
+}
+
+body {
+  margin: 0;
+  font-family: 'InterVar', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 20% 20%, #1b2c63 0%, #0b1020 45%, #050712 100%);
+  min-height: 100vh;
+}
+
+.app-shell {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.join-card,
+.conference {
+  border: 1px solid #2a3560;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--card), black 30%);
+  padding: 16px;
+}
+
+
+.join-card form {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.join-card label {
+  display: grid;
+  gap: 4px;
+}
+
+.join-card input {
+  border-radius: 8px;
+  border: 1px solid #36417a;
+  background: #0f1730;
+  color: var(--text);
+  padding: 10px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  background: linear-gradient(180deg, #1ea7ff, #2b74ff);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Conference panel ── */
+
+.conference {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.conference[hidden] {
+  display: none;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.conf-body {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  min-height: 0;
+}
+
+/* ── Screen area (left, dominant) ── */
+
+.screen-area {
+  flex: 1;
+  min-width: 0;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  display: none;
+}
+
+.screen-area.active {
+  display: block;
+}
+
+.screen-area .screen-grid {
+  height: 100%;
+  display: block;
+}
+
+.screen-area .screen-item {
+  height: 100%;
+  border: none;
+  padding: 0;
+  background: #000;
+  border-radius: 0;
+}
+
+.screen-area .screen-item span {
+  display: none;
+}
+
+.screen-area .screen-item video {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 0;
+  background: #000;
+}
+
+/* ── Cameras sidebar (right, 200px) ── */
+
+.cameras-panel {
+  width: 10%;
+  min-width: 110px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.local-tile,
+.peer-tile {
+  background: #101a38;
+  border: 1px solid #3f4a80;
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.media-area p,
+.media-area h4 {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  margin: 0;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.local-tile video,
+.peer-tile video {
+  width: 100%;
+  max-height: 150px;
+  border-radius: 8px;
+  background: #000;
+  object-fit: cover;
+  display: block;
+}
+
+.peer-tile audio {
+  display: none;
+}
+
+/* Placeholder when peer has no camera */
+.media-area {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background:
+    #0d1630
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><circle cx='40' cy='27' r='17' fill='%233f4a80'/><path d='M6 74 Q6 50 40 50 Q74 50 74 74Z' fill='%233f4a80'/></svg>")
+    center / 44% no-repeat;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.media-area video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
+
+/* ── Viewer mode: 2×2 full-screen tile grid ── */
+
+.viewer-mode .screen-area {
+  display: none;
+}
+
+/* cameras-panel becomes the 2×2 grid */
+.viewer-mode .cameras-panel {
+  width: 100%;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* #participants dissolves — its peer-tile children join cameras-panel grid directly */
+.viewer-mode #participants {
+  display: contents;
+}
+
+/* local-tile and peer-tile styled the same as grid cells */
+.viewer-mode .local-tile,
+.viewer-mode .peer-tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 8px;
+  min-height: 0;
+}
+
+.viewer-mode .local-tile p,
+.viewer-mode .peer-tile h4 {
+  display: none;
+}
+
+/* ── Role badges ── */
+
+.peer-tile {
+  position: relative;
+}
+
+.peer-tile[data-role]::before {
+  content: attr(data-role);
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0,0,0,.55);
+  color: var(--muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.peer-tile[data-role='streamer']::before {
+  background: rgba(255, 99, 99, .75);
+  color: #fff;
+}
+
+.peer-tile[data-role='viewer']::before {
+  background: rgba(127, 125, 255, .75);
+  color: #fff;
+}
+
+/* peer video: media-area fills tile, video fills media-area */
+.viewer-mode .peer-tile .media-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.viewer-mode .local-tile video,
+.viewer-mode .peer-tile video {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
+
+/* ── Error / hint ── */
+
+#joinError {
+  color: var(--danger);
+  margin: 0;
+  font-size: 14px;
+}
+
+.hint {
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+#reconnectBanner {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.reconnecting .media-area::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Portrait / vertical layout ── */
+
+@media (orientation: portrait) {
+  .conf-body {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .screen-area {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+  }
+
+  .cameras-panel {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+
+  .local-tile,
+  .peer-tile {
+    width: calc(50% - 4px);
+  }
+}
