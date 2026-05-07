@@ -162,3 +162,6 @@ WebSocket signaling: all messages carry `{ type, requestId, data }`. Consumers a
 - **TURN**: coturn (Docker)
 - **Observability**: prom-client, Prometheus, Grafana
 - **Deployment**: Docker Compose, nginx reverse proxy
+
+## License
+Licensed under the MIT License. See [LICENSE](./LICENSE).
