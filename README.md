@@ -1,15 +1,13 @@
 
 > *"Jiminy Cricket!" — what you say when the video call finally works.*
 
-  <img src="docs/logo.png" align="right" width="200px" />
-
 # Streaminy-Cricket
 
+<img src="docs/logo.png" align="right" width="200px" />
+
 A self-hosted video conferencing app built on **mediasoup** (SFU architecture). Supports camera, microphone, and screen sharing with simulcast video, a dedicated streamer/viewer role split, and built-in observability.
-
----
-
-## Features
+  
+### Features
 
 - SFU routing via mediasoup (no peer-to-peer mesh scaling issues)
 - Simulcast video (2 quality layers: 300 kbps / 800 kbps)
@@ -20,6 +18,7 @@ A self-hosted video conferencing app built on **mediasoup** (SFU architecture). 
 - Room password protection
 - Prometheus metrics + Grafana dashboard
 - Docker Compose deployment
+<br clear="right">
 
 ---
 
