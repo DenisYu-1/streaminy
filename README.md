@@ -1,16 +1,11 @@
+
+> *"Jiminy Cricket!" — what you say when the video call finally works.*
+
+  <img src="docs/logo.png" align="right" width="200px" />
+
 # Streaminy-Cricket
 
 A self-hosted video conferencing app built on **mediasoup** (SFU architecture). Supports camera, microphone, and screen sharing with simulcast video, a dedicated streamer/viewer role split, and built-in observability.
-
----
-
-## Screenshots
-
-> _Add screenshots or a short GIF here_
-
-| Join screen | Conference room | Screen sharing |
-|---|---|---|
-| ![join](docs/screenshots/join.png) | ![room](docs/screenshots/room.png) | ![screen](docs/screenshots/screen.png) |
 
 ---
 
