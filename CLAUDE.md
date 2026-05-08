@@ -2,6 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+Self-hosted WebRTC video conference. Mediasoup SFU backend routes media between peers without mixing. Target users: teams needing private, on-premise video calls. Primary goals: low-latency media routing, reliable reconnect, minimal footprint.
+
+## Tech Stack
+
+**Backend:** Node.js, mediasoup (SFU), ws (WebSocket), prom-client  
+**Frontend:** Vanilla JS (no framework), mediasoup-client via esm.sh CDN, plain CSS  
+**Infra:** Docker Compose, Prometheus, Grafana
+
+**Do not use:** TypeScript, React/Vue/Svelte, bundlers (Webpack/Vite), ORMs, databases. Keep client dependency-free except mediasoup-client from CDN.
+
+## File Placement
+
+- Server logic → `server/src/` (4 files: config, roomManager, metrics, index)
+- Client code → `client/` (app.js, index.html, styles.css)
+- New server modules go in `server/src/`; new client modules extend `client/app.js` unless large enough to warrant a separate file in `client/`
+- No new top-level directories without discussion
+
+## Coding Conventions
+
+- Plain CommonJS (`require`/`module.exports`) on server; ES modules on client (native browser)
+- No TypeScript; no transpilation step
+- Keep functions small; prefer named functions over anonymous callbacks for readability
+- Error messages include context: `throw new Error('consume: peer not found')` not `throw new Error('not found')`
+
+## Safe-Change Rules
+
+IMPORTANT: README.md and CLAUDE.md should be kept up-to-date.
+
+Avoid casual edits to:
+- **WebSocket message types** — any rename must be updated in both `server/src/index.js` and `client/app.js` simultaneously; clients in the field will break on mismatch
+- **`clientId` eviction logic** — `evictByClientId()` prevents ghost peers; breaking it causes phantom entries that persist until server restart
+- **Room data model shape** — `rooms` Map structure is referenced across roomManager, metrics, and index; changes ripple widely
+- **mediasoup codec list** — changing codecs breaks existing transports mid-session
+- **`/metrics` endpoint path** — Prometheus scrape config depends on it
+
+## Testing & Quality Bar
+
+No test suite configured. ESLint exists (`server/.eslintrc`) but not wired to CI.
+
 ## Commands
 
 **Run locally:**
