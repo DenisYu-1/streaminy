@@ -245,42 +245,58 @@ button:disabled {
   display: block;
 }
 
-/* ── Viewer mode: 2×2 full-screen tile grid ── */
+/* ── Viewer mode: dynamic tile grid (template set by JS) ── */
 
 .viewer-mode .screen-area {
   display: none;
 }
 
-/* cameras-panel becomes the 2×2 grid */
 .viewer-mode .cameras-panel {
   width: 100%;
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
   gap: 8px;
   overflow: hidden;
+  min-height: 0;
+  align-content: stretch;
 }
 
-/* #participants dissolves — its peer-tile children join cameras-panel grid directly */
+/* #participants hidden; tiles are moved directly into cameras-panel by JS */
 .viewer-mode #participants {
-  display: contents;
+  display: none;
 }
 
-/* local-tile and peer-tile styled the same as grid cells */
 .viewer-mode .local-tile,
 .viewer-mode .peer-tile {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   overflow: hidden;
   padding: 0;
   border-radius: 8px;
-  min-height: 0;
+  width: auto;
 }
 
 .viewer-mode .local-tile p,
 .viewer-mode .peer-tile h4 {
   display: none;
+}
+
+.viewer-mode .local-tile .media-area,
+.viewer-mode .peer-tile .media-area {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: unset;
+}
+
+.viewer-mode .local-tile video,
+.viewer-mode .peer-tile video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
 }
 
 /* ── Role badges ── */
@@ -315,22 +331,6 @@ button:disabled {
   color: #fff;
 }
 
-/* peer video: media-area fills tile, video fills media-area */
-.viewer-mode .peer-tile .media-area {
-  flex: 1;
-  min-height: 0;
-}
-
-.viewer-mode .local-tile video,
-.viewer-mode .peer-tile video {
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: cover;
-  border-radius: 0;
-  display: block;
-}
-
 /* ── Error / hint ── */
 
 #joinError {
@@ -359,6 +359,30 @@ button:disabled {
   z-index: 2;
 }
 
+/* ── Conference-only: no chrome ── */
+
+body.in-conference .topbar {
+  display: none;
+}
+
+body.in-conference .toolbar {
+  display: none;
+}
+
+body.in-conference.is-streamer .toolbar {
+  display: flex;
+}
+
+body.in-conference .app-shell {
+  padding: 0;
+}
+
+body.in-conference .conference {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
 /* ── Portrait / vertical layout ── */
 
 @media (orientation: portrait) {
@@ -383,6 +407,10 @@ button:disabled {
     flex-direction: row;
     flex-wrap: wrap;
     align-content: flex-start;
+  }
+
+  #participants {
+    display: contents;
   }
 
   .local-tile,

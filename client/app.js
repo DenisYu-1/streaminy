@@ -28,6 +28,7 @@ const reconnectBanner = document.getElementById('reconnectBanner');
 if (isStreamer) {
   startScreenButton.hidden = false;
   stopScreenButton.hidden = false;
+  document.body.classList.add('is-streamer');
 }
 
 let socket;
@@ -40,6 +41,7 @@ let localStream;
 let micProducer;
 let cameraProducer;
 let screenProducer;
+let screenTrack = null;
 let rtpCapabilities = null;
 let audioCodecBitrate = 64_000;
 let videoEncodings = [];
@@ -194,6 +196,7 @@ async function requestDisplayMedia(constraints) {
 async function activateRoom(payload) {
   participantsContainer.innerHTML = '';
   screenGrid.innerHTML = '';
+  document.querySelectorAll('.cameras-panel > .peer-tile').forEach(t => t.remove());
   document.getElementById('screenArea').classList.remove('active');
   conferencePanel.classList.remove('reconnecting');
   participants.clear();
@@ -225,19 +228,25 @@ async function activateRoom(payload) {
 
   if (isStreamer) {
     document.getElementById('localTile').hidden = true;
+    leaveRoomButton.hidden = true;
   }
 
   await createDevice();
   await setupTransports();
-  for (const producer of payload.existingProducers) {
-    await enqueueConsume(() => consumeProducer(producer));
+  if (!isStreamer) {
+    for (const producer of payload.existingProducers) {
+      await enqueueConsume(() => consumeProducer(producer));
+    }
   }
   if (!isStreamer) {
     await publishLocalMedia();
   }
 
+  updateViewerLayout();
+
   joinPanel.hidden = true;
   conferencePanel.hidden = false;
+  document.body.classList.add('in-conference');
 }
 
 function sendRequest(type, data = {}) {
@@ -308,6 +317,7 @@ function getOrCreateTile(peerIdValue, name, peerRole) {
 
   participantsContainer.appendChild(tile);
   participants.set(peerIdValue, tile);
+  updateViewerLayout();
 
   return tile;
 }
@@ -412,6 +422,59 @@ function removeParticipantFromDom(peerIdValue) {
 
   participantsData.delete(peerIdValue);
   removeAllPeerConsumers(peerIdValue);
+  updateViewerLayout();
+}
+
+function updateViewerLayout() {
+  if (!isViewer) return;
+
+  const panel = document.querySelector('.cameras-panel');
+  const localTileEl = document.getElementById('localTile');
+  const allTiles = [localTileEl, ...[...participants.values()]]
+    .filter(t => t && !t.hidden);
+  const n = allTiles.length;
+
+  // reset per-tile overrides and move tiles into grid container
+  allTiles.forEach(t => {
+    t.style.gridColumn = '';
+    t.style.gridRow = '';
+    panel.appendChild(t);
+  });
+
+  panel.style.gridAutoFlow = '';
+  panel.style.overflowX = 'hidden';
+
+  if (n <= 1) {
+    panel.style.gridTemplateColumns = '1fr';
+    panel.style.gridTemplateRows = '1fr';
+  } else if (n === 2) {
+    panel.style.gridTemplateColumns = '1fr';
+    panel.style.gridTemplateRows = '1fr 1fr';
+  } else if (n === 3) {
+    panel.style.gridTemplateColumns = '1fr 1fr';
+    panel.style.gridTemplateRows = '1fr 1fr';
+    allTiles[0].style.gridColumn = '1 / span 2';
+  } else if (n === 4) {
+    panel.style.gridTemplateColumns = '1fr 1fr';
+    panel.style.gridTemplateRows = '1fr 1fr';
+  } else if (n === 5) {
+    panel.style.gridTemplateColumns = 'repeat(6, 1fr)';
+    panel.style.gridTemplateRows = '1fr 1fr';
+    allTiles[0].style.gridColumn = '1 / span 3';
+    allTiles[1].style.gridColumn = '4 / span 3';
+    allTiles[2].style.gridColumn = '1 / span 2';
+    allTiles[3].style.gridColumn = '3 / span 2';
+    allTiles[4].style.gridColumn = '5 / span 2';
+  } else if (n === 6) {
+    panel.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    panel.style.gridTemplateRows = '1fr 1fr';
+  } else {
+    const cols = Math.ceil(n / 2);
+    panel.style.gridTemplateColumns = `repeat(${cols}, calc(100% / 3))`;
+    panel.style.gridTemplateRows = '1fr 1fr';
+    panel.style.gridAutoFlow = 'column';
+    panel.style.overflowX = 'auto';
+  }
 }
 
 async function createDevice() {
@@ -421,12 +484,8 @@ async function createDevice() {
 
 async function setupTransports() {
   const sendTransportResponse = await sendRequest('create-transport', { direction: 'send' });
-  const recvTransportResponse = await sendRequest('create-transport', { direction: 'recv' });
   logIceTransportConfig(sendTransportResponse.transport, 'send');
-  logIceTransportConfig(recvTransportResponse.transport, 'recv');
-
   sendTransport = device.createSendTransport(sendTransportResponse.transport);
-  recvTransport = device.createRecvTransport(recvTransportResponse.transport);
 
   sendTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
     try {
@@ -454,6 +513,14 @@ async function setupTransports() {
       errback(error);
     }
   });
+
+  if (isStreamer) {
+    return;
+  }
+
+  const recvTransportResponse = await sendRequest('create-transport', { direction: 'recv' });
+  logIceTransportConfig(recvTransportResponse.transport, 'recv');
+  recvTransport = device.createRecvTransport(recvTransportResponse.transport);
 
   recvTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
     try {
@@ -526,10 +593,12 @@ async function publishScreen() {
   });
 
   const [track] = stream.getVideoTracks();
+  screenTrack = track;
   track.onended = stopScreenShare;
 
   screenProducer = await sendTransport.produce({
     track,
+    stopTracks: false,
     appData: {
       mediaType: 'screen',
       source: 'screen-share'
@@ -545,14 +614,33 @@ async function stopScreenShare() {
     return;
   }
 
-  await sendRequest('close-producer', {
-    producerId: screenProducer.id
-  });
+  const track = screenProducer.track;
+  const producerId = screenProducer.id;
 
   screenProducer.close();
   screenProducer = null;
+  screenTrack = null;
+  track?.stop();
   startScreenButton.disabled = false;
   stopScreenButton.disabled = true;
+
+  try {
+    await sendRequest('close-producer', { producerId });
+  } catch {
+    // best-effort; local state already cleaned up
+  }
+}
+
+async function republishScreen(track) {
+  if (!sendTransport) return;
+  track.onended = stopScreenShare;
+  screenProducer = await sendTransport.produce({
+    track,
+    stopTracks: false,
+    appData: { mediaType: 'screen', source: 'screen-share' }
+  });
+  startScreenButton.disabled = true;
+  stopScreenButton.disabled = false;
 }
 
 async function consumeProducer({ producerId, peerId: sourcePeerId, appData }) {
@@ -711,6 +799,10 @@ function softReset() {
   cameraProducer = null;
   screenProducer = null;
   currentPeerId = '';
+  if (isStreamer && startScreenButton) {
+    startScreenButton.disabled = false;
+    stopScreenButton.disabled = true;
+  }
   consumeQueue = Promise.resolve();
 
   if (socket) {
@@ -724,6 +816,7 @@ function scheduleReconnect() {
     resetSession();
     conferencePanel.hidden = true;
     joinPanel.hidden = false;
+    document.body.classList.remove('in-conference');
     showJoinError('Соединение потеряно. Попробуйте снова.');
     reconnectAttempts = 0;
     return;
@@ -780,18 +873,24 @@ function connectAndJoin(peerName, password) {
     }
 
     if (message.type === 'peer-joined') {
-      participantsData.set(message.peerId, { name: message.name, role: message.role });
-      getOrCreateTile(message.peerId, message.name, message.role);
+      if (!isStreamer) {
+        participantsData.set(message.peerId, { name: message.name, role: message.role });
+        getOrCreateTile(message.peerId, message.name, message.role);
+      }
       return;
     }
 
     if (message.type === 'peer-left') {
-      removeParticipantFromDom(message.peerId);
+      if (!isStreamer) {
+        removeParticipantFromDom(message.peerId);
+      }
       return;
     }
 
     if (message.type === 'new-producer') {
-      void enqueueConsume(() => consumeProducer(message));
+      if (!isStreamer) {
+        void enqueueConsume(() => consumeProducer(message));
+      }
       return;
     }
 
@@ -818,6 +917,10 @@ function connectAndJoin(peerName, password) {
       reconnectBanner.hidden = true;
 
       await activateRoom({ ...roomPayload, peerName });
+
+      if (screenTrack && screenTrack.readyState === 'live') {
+        try { await republishScreen(screenTrack); } catch { screenTrack = null; }
+      }
     } catch (error) {
       if (reconnectAttempts > 0) {
         socket.close();
@@ -932,6 +1035,7 @@ leaveRoomButton.addEventListener('click', async () => {
     resetSession();
     conferencePanel.hidden = true;
     joinPanel.hidden = false;
+    document.body.classList.remove('in-conference');
   }
 });
 
