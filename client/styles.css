@@ -275,8 +275,7 @@ button:disabled {
   width: auto;
 }
 
-.viewer-mode .local-tile p,
-.viewer-mode .peer-tile h4 {
+.viewer-mode .local-tile p {
   display: none;
 }
 

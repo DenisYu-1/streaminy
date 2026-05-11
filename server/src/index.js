@@ -345,9 +345,16 @@ function createServer(worker) {
   const wss = new WebSocketServer({ server, path: '/' });
 
   wss.on('connection', (ws) => {
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === ws.OPEN) {
+        ws.ping();
+      }
+    }, 30000);
+
     ws.on('message', (message) => onMessage(ws, message));
 
     ws.on('close', () => {
+      clearInterval(pingInterval);
       const state = connections.get(ws);
       if (!state) {
         return;
